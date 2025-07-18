@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Detection Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
+  <!-- AOS CSS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1a5f7a;
+      --accent: #ff6b6b;
+      --background: #f8f9fa;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text: #2d3436;
+    }
+
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #f8f9fa);
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* Full-page background with overlay */
+    .page-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://source.unsplash.com/1600x900/?nature,greenery') no-repeat center center/cover;
+      z-index: -2;
+    }
+    .page-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.3);
+      z-index: -1;
+    }
+
+    /* Result Container */
+    .result-container {
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      width: 100%;
+      margin: 5rem auto;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .result-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    .result-container h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* Result Content */
+    .result-content {
+      margin-bottom: 2rem;
+    }
+    .result-content h2 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .result-content pre {
+      background: #f1f1f1;
+      padding: 1rem;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Buttons */
+    .btn-custom {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: 50px;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-custom:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(255,107,107,0.3);
+    }
+
+    /* Audio Player */
+    audio {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    /* Enhanced Chatbot Floating Button */
+    .chatbot-button {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: linear-gradient(135deg, #1a5f7a, #3a8fb7);
+      color: #fff;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+    }
+    .chatbot-button:hover {
+      transform: scale(1.1);
+    }
+
+    /* Enhanced Chatbot Container */
+    .chatbot-container {
+      position: fixed;
+      bottom: 100px;
+      right: 25px;
+      width: 320px;
+      max-height: 450px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      animation: fadeInUp 0.4s ease;
+    }
+
+    .chatbot-header {
+      background: linear-gradient(135deg, #1a5f7a, #3a8fb7);
+      color: #fff;
+      padding: 12px 15px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .btn-close-chat {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      padding: 12px 15px;
+      overflow-y: auto;
+      background: #f7f7f7;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    .chatbot-messages div {
+      margin-bottom: 10px;
+    }
+    .chatbot-messages div strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .chatbot-input-container {
+      display: flex;
+      padding: 10px 15px;
+      border-top: 1px solid #e0e0e0;
+      background: #fff;
+    }
+    .chatbot-input-container input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+    .chatbot-input-container input:focus {
+      border-color: #1a5f7a;
+    }
+    .chatbot-send-btn {
+      background: #ff6b6b;
+      border: none;
+      color: #fff;
+      margin-left: 10px;
+      padding: 8px 12px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .chatbot-send-btn:hover {
+      background: #ff4b4b;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+      .result-container {
+        padding: 2rem 1.5rem;
+      }
+      .result-container h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-bg"></div>
+  <div class="page-overlay"></div>
+  <div class="container">
+    <div class="result-container shadow" data-aos="fade-up">
+      <h1>Detection Result</h1>
+      <div class="result-content">
+        <h2>Predicted Disease</h2>
+        <p><strong>{{ predicted_disease }}</strong></p>
+      </div>
+
+      <div class="result-content">
+        <h2>Suggestion Report</h2>
+        <pre>{{ suggestion_report }}</pre>
+        <!-- Download button for the suggestion report -->
+        <a href="{{ url_for('download_report') }}" class="btn btn-custom">
+          <i class="fas fa-download me-2"></i> Download Report
+        </a>
+      </div>
+
+      <div class="result-content">
+        <h2>Uploaded Audio</h2>
+        <audio id="resultAudio" controls>
+          <source src="{{ url_for('uploaded_file', filename=audio_filename) }}" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+        <br>
+        <button class="btn btn-custom" onclick="playAudio()">
+          <i class="fas fa-play me-2"></i> Play Audio
+        </button>
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-custom">
+          <i class="fas fa-redo me-2"></i> Try Again
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Chatbot Floating Button -->
+  <div id="chatbot-button" class="chatbot-button">
+    <i class="fas fa-comments"></i>
+  </div>
+
+  <!-- Enhanced Chatbot Container -->
+  <div id="chatbot-container" class="chatbot-container">
+    <div class="chatbot-header">
+      <span>Plant Chatbot</span>
+      <button id="chatbot-close" class="btn-close-chat"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="chatbot-messages" class="chatbot-messages"></div>
+    <div class="chatbot-input-container">
+      <input type="text" id="chatbot-input" placeholder="Type your message...">
+      <button id="chatbot-send" class="chatbot-send-btn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- AOS JS -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 1200 });
+
+    function playAudio() {
+      var audioElement = document.getElementById("resultAudio");
+      audioElement.play();
+    }
+
+    // Toggle Chatbot Container Visibility
+    document.getElementById("chatbot-button").addEventListener("click", function() {
+      var container = document.getElementById("chatbot-container");
+      container.style.display = container.style.display === "none" || container.style.display === "" ? "flex" : "none";
+    });
+
+    document.getElementById("chatbot-close").addEventListener("click", function() {
+      document.getElementById("chatbot-container").style.display = "none";
+    });
+
+    document.getElementById("chatbot-send").addEventListener("click", sendChatMessage);
+
+    document.getElementById("chatbot-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        sendChatMessage();
+      }
+    });
+
+    function sendChatMessage() {
+      var input = document.getElementById("chatbot-input");
+      var message = input.value.trim();
+      if (!message) return;
+      appendMessage("You", message);
+      input.value = "";
+      // Send the message to the server
+      fetch("/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.response) {
+          appendMessage("Plant Chatbot", data.response);
+        } else {
+          appendMessage("Plant Chatbot", "Sorry, something went wrong.");
+        }
+      })
+      .catch(error => {
+        appendMessage("Plant Chatbot", "Error: " + error);
+      });
+    }
+
+    function appendMessage(sender, message) {
+      var messagesDiv = document.getElementById("chatbot-messages");
+      var messageDiv = document.createElement("div");
+      messageDiv.innerHTML = "<strong>" + sender + ":</strong> " + message;
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  </script>
+</body>
+</html>
